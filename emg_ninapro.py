@@ -311,7 +311,7 @@ if __name__ == "__main__":
             rep["cohens_kappa"], rep["split_unit"]))
         print("   spread:", rep["summary"])   # the per-subject range, not just the pool
 
-# added by vera to be able to run baseline
+# added by vera to be able to run the baseline
 if __name__ == "__main__":
     t = EMGNinaproTrack()
 
@@ -333,3 +333,5 @@ if __name__ == "__main__":
         print("cohens_kappa:", rep["cohens_kappa"])
         print("split_unit:", rep["split_unit"])
         print("spread:", rep["summary"])
+    
+    # when running the baseline we got a result of 0.78 within-subject and 0.19 for new-subject
