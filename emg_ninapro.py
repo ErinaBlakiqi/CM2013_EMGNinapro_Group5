@@ -310,3 +310,26 @@ if __name__ == "__main__":
             name, f1_score(rep["y_true"], rep["y_pred"], average="macro"),
             rep["cohens_kappa"], rep["split_unit"]))
         print("   spread:", rep["summary"])   # the per-subject range, not just the pool
+
+# added by vera to be able to run baseline
+if __name__ == "__main__":
+    t = EMGNinaproTrack()
+
+    cache = "data/ninapro_db1"
+
+    # 1. Download the real Ninapro DB1 data for subjects 1-5
+    t.download(cache, subset=range(1, 6))
+
+    # 2. Load the dataset
+    recs = t.load(cache)
+
+    # 3. Evaluate the supplied baseline in both evaluation modes
+    modes = t.evaluate_modes(recs)
+
+    # 4. Print the baseline results
+    for name, rep in modes.items():
+        print("\n", name)
+        print("macro_f1:", rep["macro_f1"])
+        print("cohens_kappa:", rep["cohens_kappa"])
+        print("split_unit:", rep["split_unit"])
+        print("spread:", rep["summary"])
