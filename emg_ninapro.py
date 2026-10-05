@@ -311,7 +311,7 @@ if __name__ == "__main__":
             rep["cohens_kappa"], rep["split_unit"]))
         print("   spread:", rep["summary"])   # the per-subject range, not just the pool
 
-# added by vera to be able to run the baseline
+# added by vera to be able to run the baseline -> we have the notebook for this - Erina 
 if __name__ == "__main__":
     t = EMGNinaproTrack()
 
