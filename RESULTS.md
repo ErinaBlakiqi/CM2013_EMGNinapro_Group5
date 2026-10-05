@@ -1,4 +1,4 @@
-# Results log — `<your track>`, `<your team>`
+# Results log — `EMG_Ninapro`, `T5`
 
 > **Copy this file into YOUR team's project repository** (not this scaffold repo) as
 > `RESULTS.md`, and add one row per iteration as you go — not the night before the deadline.
@@ -17,9 +17,10 @@
 > weakness. Rows here are also direct evidence for "Reproducibility & engineering" and "Report
 > quality & defence".
 
-**Track:** `<sleep_edf | ecg_cinc2017 | har | ctg_ctu_uhb | emg_ninapro | bci_eegmmidb>` ·
-**Split unit:** `<subject | record | recording>` · **Primary metric:** `<Cohen's κ | macro-F1>` ·
-**Evaluation mode(s):** `<new-subject | within-subject + new-subject>`
+**Track:** `emg_ninapro` ·
+**Split unit:** `subject` for new-subject evaluation; `repetition` for within-subject evaluation ·
+**Primary metric:** `macro-F1` ·
+**Evaluation mode(s):** `within-subject + new-subject`
 
 ## Iteration log
 
@@ -29,7 +30,7 @@ spread is half a result.
 
 | # | Date | What changed & why (one line) | Primary metric **with spread** | Better than previous? | If not — why it was kept | Commit |
 |---|---|---|---|---|---|---|
-| 1 | 2026-09-29 | *e.g.* supplied baseline, unchanged — establish the floor | mean κ 0.41 (sd 0.09, range 0.29–0.55 across 6 subjects) | — (baseline) | — | `a1b2c3d` |
+| 1 | 2026-10-05 | Supplied baseline, unchanged — establish the baseline on real Ninapro DB1 data | within-subject: mean macro-F1 0.788 (sd 0.055, range 0.742–0.883 across 5 subjects); new-subject: mean macro-F1 0.158 (sd 0.043, range 0.093–0.209 across 5 subjects) | — (baseline) | — | — |
 | 2 |  |  |  | yes / no |  |  |
 | 3 |  |  |  | yes / no |  |  |
 | 4 |  |  |  | yes / no |  |  |
@@ -39,6 +40,17 @@ same seed. A change that lowers the metric can still be the right call (simpler,
 robust across subjects, removes a leak). Say so in the column instead of quietly reverting it:
 "kept — κ fell 0.02 but the worst-subject κ rose from 0.18 to 0.31" is a stronger result than a
 silent higher mean.*
+
+## Leakage demonstration — Iteration 1
+
+Using the real Ninapro DB1 data, the required one-time leakage demonstration gave:
+
+| Split | Macro-F1 |
+|---|---:|
+| Naive random-window split (leaky) | 0.843 |
+| Honest new-subject split | 0.191 |
+
+The random-window split produced a much higher score because windows from the same subjects/repetitions can appear on both sides of the split. The honest new-subject evaluation is therefore the relevant deployment result for cross-subject generalisation.
 
 ## ⚠️ Before you fill in many rows — the garden of forking paths
 
@@ -91,7 +103,7 @@ add rows as the pipeline grows, and note the alternative you rejected.
 
 | Pipeline module | Option chosen | Alternative(s) considered | Why this one (one sentence) | Iteration | Revised later? |
 |---|---|---|---|---|---|
-| 1. Data loading | *e.g.* 8 subjects, both nights | more subjects, one night each | subject-level split needs both nights inside one group | 1 | — |
+| 1. Data loading | Real Ninapro DB1, exercise E1, 5 subjects | Synthetic smoke data | Real data was used to establish the actual baseline required for the EMG track | 1 | — |
 | 2. Preprocessing |  |  |  |  |  |
 | 3. Feature extraction |  |  |  |  |  |
 | 4. Feature selection | *e.g.* `select="none"` | ANOVA `SelectKBest`, tree importances | 14 features vs. ~1 800 epochs — pruning risked more than it saved | 1 | *e.g.* **yes, iter 4** — `select_k=20` was a no-op (harness said so); switched to `k=6` |
@@ -120,7 +132,7 @@ between iterations. Record what actually happened.
 
 | Iteration | Who | Modules / tasks owned | Reviewed by |
 |---|---|---|---|
-| 1 |  |  |  |
+| 1 | Erina | Baseline execution on real Ninapro DB1 data; evaluation of within-subject and new-subject macro-F1; results logging |  |
 
 ## Final numbers (fill in once, at the end)
 
