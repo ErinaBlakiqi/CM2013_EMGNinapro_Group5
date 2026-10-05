@@ -30,7 +30,7 @@ spread is half a result.
 
 | # | Date | What changed & why (one line) | Primary metric **with spread** | Better than previous? | If not — why it was kept | Commit |
 |---|---|---|---|---|---|---|
-| 1 | 2026-10-05 | Supplied baseline, unchanged — establish the baseline on real Ninapro DB1 data | within-subject: mean macro-F1 0.788 (sd 0.055, range 0.742–0.883 across 5 subjects); new-subject: mean macro-F1 0.158 (sd 0.043, range 0.093–0.209 across 5 subjects) | — (baseline) | — | — |
+| 1 | 2026-10-05 | Supplied baseline, unchanged — establish the baseline on real Ninapro DB1 data | within-subject: mean macro-F1 0.788 (sd 0.055, range 0.742–0.883 across 5 subjects); new-subject: mean macro-F1 0.158 (sd 0.043, range 0.093–0.209 across 5 subjects) | — (baseline) | — | a0e08830cb71e1c6671cbfab15740ca0d2eaa7ca |
 | 2 |  |  |  | yes / no |  |  |
 | 3 |  |  |  | yes / no |  |  |
 | 4 |  |  |  | yes / no |  |  |
