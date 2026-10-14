@@ -1,3 +1,5 @@
+# Vera added this for inspecting the data with plots
+
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 import numpy as np
