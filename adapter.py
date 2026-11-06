@@ -1913,6 +1913,21 @@ class TrackAdapter:
         print(f"[{type(self).__name__}] parsed {len(recs)} recordings; cached to {os.path.basename(cache_file)}")
         return recs
 
+    def split_holdout(self, recs):
+        """Split recordings into (train, holdout) using `meta.holdout_ids`.
+
+        Develop and cross-validate on `train` only. Use `holdout` once, at the end, to write
+        `predictions.csv` with the frozen final model (see HOLDOUT_EVALUATION.md)."""
+        hold = set(self.meta.holdout_ids)
+        return [r for r in recs if r.group not in hold], [r for r in recs if r.group in hold]
+
+    def assert_no_holdout(self, recs):
+        """Raise if any recording belongs to the hold-out set: call it on your training data."""
+        leaked = sorted({r.group for r in recs} & set(self.meta.holdout_ids))
+        if leaked:
+            raise ValueError(f"hold-out groups found in the data you are training on: {leaked}. "
+                             "Remove them; see HOLDOUT_EVALUATION.md.")
+
     def write_submission(self, test_recs, path, model, cfg=None,
                          allow_cfg_mismatch: bool = False):
         """Write a hold-out `predictions.csv` in the track's granularity:
