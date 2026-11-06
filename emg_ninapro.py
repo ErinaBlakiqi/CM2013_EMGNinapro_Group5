@@ -20,7 +20,7 @@ from __future__ import annotations
 import numpy as np
 
 from adapter import (TrackAdapter, TrackMeta, Recording, default_baseline,
-                     denoise)
+                     denoise, cached)
 
 FS = 100.0
 WIN = 20          # 200 ms window
@@ -299,6 +299,32 @@ class EMGNinaproTrack(TrackAdapter):
                                       labels=np.array(labs), meta={"rep": np.array(reps)}))
         return recs
 
+    def load_cached(self, data_dir, cache_dir, exercise="E1"):
+        """Load EMG recordings, reusing cached windows when possible."""
+        from pathlib import Path
+
+        mat_files = sorted(Path(data_dir).rglob(f"*_{exercise}.mat"))
+
+        key = {
+            "version": 1,
+            "exercise": exercise,
+            "files": [
+                (str(p.resolve()), p.stat().st_size, p.stat().st_mtime_ns)
+                for p in mat_files
+            ],
+            "fs": FS,
+            "win": WIN,
+            "step": STEP,
+            "classes": list(self.meta.classes),
+        }
+
+        return cached(
+            "ninapro_load",
+            key,
+            lambda: self.load(data_dir, exercise=exercise),
+            cache_dir,
+        )       
+
 
 if __name__ == "__main__":
     t = EMGNinaproTrack()
@@ -310,28 +336,3 @@ if __name__ == "__main__":
             name, f1_score(rep["y_true"], rep["y_pred"], average="macro"),
             rep["cohens_kappa"], rep["split_unit"]))
         print("   spread:", rep["summary"])   # the per-subject range, not just the pool
-
-# added by vera to be able to run the baseline -> we have the notebook for this - Erina 
-if __name__ == "__main__":
-    t = EMGNinaproTrack()
-
-    cache = "data/ninapro_db1"
-
-    # 1. Download the real Ninapro DB1 data for subjects 1-5
-    t.download(cache, subset=range(1, 6))
-
-    # 2. Load the dataset
-    recs = t.load(cache)
-
-    # 3. Evaluate the supplied baseline in both evaluation modes
-    modes = t.evaluate_modes(recs)
-
-    # 4. Print the baseline results
-    for name, rep in modes.items():
-        print("\n", name)
-        print("macro_f1:", rep["macro_f1"])
-        print("cohens_kappa:", rep["cohens_kappa"])
-        print("split_unit:", rep["split_unit"])
-        print("spread:", rep["summary"])
-    
-    # when running the baseline we got a result of 0.78 within-subject and 0.19 for new-subject
