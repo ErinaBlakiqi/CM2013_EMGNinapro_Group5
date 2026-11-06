@@ -31,7 +31,7 @@ spread is half a result.
 | # | Date | What changed & why (one line) | Primary metric **with spread** | Better than previous? | If not — why it was kept | Commit |
 |---|---|---|---|---|---|---|
 | 1 | 2026-10-05 | Supplied baseline, unchanged — establish the baseline on real Ninapro DB1 data | within-subject: mean macro-F1 0.788 (sd 0.054, range 0.741–0.881 across 5 subjects); new-subject: mean macro-F1 0.159 (sd 0.045, range 0.092–0.216 across 5 subjects) | — (baseline) | — | a0e08830cb71e1c6671cbfab15740ca0d2eaa7ca |
-| 2 |  |  |  | yes / no |  |  |
+| 2 | 2026-11-06 | Tested fixed 3-sample causal moving-average smoothing on the preprocessed Ninapro DB1 EMG envelopes to assess whether reducing short-term fluctuations improves classification. Compared against the unchanged baseline using the same group-aware evaluation harness. | Within-subject: mean macro-F1 0.785 (sd 0.051, range 0.742–0.874 across 5 subjects); new-subject: mean macro-F1 0.172 (sd 0.046, range 0.096–0.219 across 5 subjects). Pooled macro-F1: within-subject 0.781; new-subject 0.205. | Mixed: pooled new-subject macro-F1 increased 0.191 → 0.205, but within-subject decreased 0.783 → 0.781. | Retained as an optional experimental configuration, not yet selected as the final default. The cross-subject improvement is small relative to between-subject variability; additional comparisons are needed before selecting the final preprocessing method. | Pending — add commit hash after committing |
 | 3 |  |  |  | yes / no |  |  |
 | 4 |  |  |  | yes / no |  |  |
 
@@ -104,7 +104,7 @@ add rows as the pipeline grows, and note the alternative you rejected.
 | Pipeline module | Option chosen | Alternative(s) considered | Why this one (one sentence) | Iteration | Revised later? |
 |---|---|---|---|---|---|
 | 1. Data loading | Real Ninapro DB1, exercise E1, 5 subjects | Synthetic smoke data | Real data was used to establish the actual baseline required for the EMG track | 1 | — |
-| 2. Preprocessing |  |  |  |  |  |
+| 2. Preprocessing | Identity preprocessing (`preprocess="none"`) retained as baseline; fixed 3-sample causal moving average (`preprocess="moving_average"`) implemented as an optional configuration | No additional smoothing; subject-specific normalization (not yet implemented or evaluated) | Ninapro DB1 already contains rectified, low-pass-filtered EMG envelopes. A fixed causal moving average was tested to reduce short-term fluctuations without fitting parameters across subjects or accessing future samples. Results showed a small pooled new-subject improvement but no convincing overall benefit. | 2 | Not yet — final preprocessing selection pending |
 | 3. Feature extraction |  |  |  |  |  |
 | 4. Feature selection | *e.g.* `select="none"` | ANOVA `SelectKBest`, tree importances | 14 features vs. ~1 800 epochs — pruning risked more than it saved | 1 | *e.g.* **yes, iter 4** — `select_k=20` was a no-op (harness said so); switched to `k=6` |
 | 5. Classification, incl. `imbalance` | *e.g.* `imbalance="balanced"` | `"none"`, `"resample"`, `"threshold"` | *(if you kept the default, say you looked and why — a silent default earns nothing)* |  |  |
@@ -133,6 +133,7 @@ between iterations. Record what actually happened.
 | Iteration | Who | Modules / tasks owned | Reviewed by |
 |---|---|---|---|
 | 1 | Erina | Baseline execution on real Ninapro DB1 data; evaluation of within-subject and new-subject macro-F1; results logging | Vera |
+| 2 | Erina | Implemented configurable causal moving-average preprocessing; verified baseline preservation, numerical correctness, causality within windows, non-mutation, and integration with the real Ninapro feature pipeline; evaluated both required classification modes and documented the results. | Pending team review |
 
 ## Final numbers (fill in once, at the end)
 

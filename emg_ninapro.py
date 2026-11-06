@@ -18,6 +18,7 @@ Two evaluation modes (electrode placement makes cross-subject sEMG much harder):
 """
 from __future__ import annotations
 import numpy as np
+import copy
 
 from adapter import (TrackAdapter, TrackMeta, Recording, default_baseline,
                      denoise, cached)
@@ -72,7 +73,7 @@ class EMGNinaproTrack(TrackAdapter):
     #: spectrum, not integrated from a PSD, so there is no estimator to choose.
     #: Both menus are therefore refused rather than silently ignored; declare your
     #: own keys once you have implemented the stage that reads them.
-    SUPPORTED_CFG_KEYS = frozenset()
+    SUPPORTED_CFG_KEYS = frozenset({"preprocess"})
 
     CFG_KEY_HINTS = {
         "preprocess": "EMG's preprocess() is an identity stub. The stage-2 move that attacks this "
@@ -184,7 +185,31 @@ class EMGNinaproTrack(TrackAdapter):
         offline number as a real-time claim without saying so. State which regime
         each number belongs to, the same way you state the split unit.
         """
-        return rec
+        method = (cfg or {}).get("preprocess", "none")
+
+        if method == "none":
+            return rec
+
+        if method != "moving_average":
+            raise ValueError(f"Unsupported preprocessing method: {method}")
+
+        # Three-sample causal moving average, independently per EMG window.
+        # No future samples or other recordings are used.
+        from scipy.ndimage import uniform_filter1d
+
+        windows = np.asarray(rec.epochs["emg"])
+        smoothed = uniform_filter1d(
+            windows,
+            size=3,
+            axis=1,
+            mode="nearest",
+            origin=1,
+        )
+
+        new_rec = copy.copy(rec)
+        new_rec.epochs = dict(rec.epochs)
+        new_rec.epochs["emg"] = smoothed
+        return new_rec
 
     def extract_features(self, rec: Recording, cfg=None):
         """Module 3 — per-window, per-channel time-domain descriptors (MAV, RMS,
