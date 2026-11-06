@@ -1,0 +1,16 @@
+# Python virtual environment
+.venv/
+
+# Python-generated files
+__pycache__/
+*.pyc
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Local data and cache
+cm2013_data/
+_cache_*.pkl
+
+# macOS files
+.DS_Store
