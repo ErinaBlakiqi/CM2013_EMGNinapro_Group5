@@ -32,9 +32,6 @@ spread is half a result.
 |---|---|---|---|---|---|---|
 | 1 | 2026-10-05 | Supplied baseline, unchanged — establish the baseline on real Ninapro DB1 data | within-subject: mean macro-F1 0.788 (sd 0.054, range 0.741–0.881 across 5 subjects); new-subject: mean macro-F1 0.159 (sd 0.045, range 0.092–0.216 across 5 subjects) | — (baseline) | — | a0e08830cb71e1c6671cbfab15740ca0d2eaa7ca |
 | 2 | 2026-11-06 | Tested fixed 3-sample causal moving-average smoothing on the preprocessed Ninapro DB1 EMG envelopes to assess whether reducing short-term fluctuations improves classification. Compared against the unchanged baseline using the same group-aware evaluation harness. | Within-subject: mean macro-F1 0.785 (sd 0.051, range 0.742–0.874 across 5 subjects); new-subject: mean macro-F1 0.172 (sd 0.046, range 0.096–0.219 across 5 subjects). Pooled macro-F1: within-subject 0.781; new-subject 0.205. | Mixed: pooled new-subject macro-F1 increased 0.191 → 0.205, but within-subject decreased 0.783 → 0.781. | Retained as an optional experimental configuration, not yet selected as the final default. The cross-subject improvement is small relative to between-subject variability; additional comparisons are needed before selecting the final preprocessing method. | 4471f14 |
-| 2-FE1 | 2026-11-07 | Re-ran the unchanged 50-feature baseline on S1–S5 to establish the reference for the feature comparisons below. | Within-subject: mean macro-F1 0.790 (sd 0.054, range 0.743–0.880 across 5 subjects); new-subject: mean macro-F1 0.161 (sd 0.043, range 0.097–0.210 across 5 subjects). Pooled macro-F1: within-subject 0.784; new-subject 0.192. | Reference run, not an improvement claim. | Earlier baseline results are preserved; the small differences from the historical runs have not been attributed to a verified cause. | Pipeline: 0741891; verification log: 46a398b; local runner not committed |
-| 2-FE2 | 2026-11-07 | Removed RMS from each of the ten channels, reducing 50 features to 40, to test whether the strong MAV–RMS correlation justified removing RMS. | Within-subject: mean macro-F1 0.779 (sd 0.052, range 0.732–0.866 across 5 subjects); new-subject: mean macro-F1 0.162 (sd 0.039, range 0.103–0.211 across 5 subjects). Pooled macro-F1: within-subject 0.773; new-subject 0.194. | Mixed: pooled within-subject macro-F1 decreased 0.784 → 0.773; new-subject increased only 0.192 → 0.194. | RMS retained in the reference baseline: removing it reduced within-subject macro-F1 for all five subjects without a clear new-subject benefit. | Original experiment: 32acf7f; setup adaptations and verification log: 46a398b |
-| 2-FE3 | 2026-11-07 | Added one IQR feature per channel while retaining the original 50 features, giving 60 features, to test whether robust amplitude spread adds useful information. | Within-subject: mean macro-F1 0.783 (sd 0.051, range 0.737–0.869 across 5 subjects); new-subject: mean macro-F1 0.165 (sd 0.043, range 0.095–0.208 across 5 subjects). Pooled macro-F1: within-subject 0.778; new-subject 0.199. | Mixed: pooled new-subject macro-F1 increased 0.192 → 0.199, but within-subject decreased 0.784 → 0.778. | IQR retained as an experimental candidate, not the default: its small new-subject gain was inconsistent across subjects. Its interaction with the team's preprocessing has not been tested. | Original experiment: 32acf7f; setup adaptations and verification log: 46a398b |
 | 3 |  |  |  | yes / no |  |  |
 | 4 |  |  |  | yes / no |  |  |
 
@@ -44,113 +41,30 @@ robust across subjects, removes a leak). Say so in the column instead of quietly
 "kept — κ fell 0.02 but the worst-subject κ rose from 0.18 to 0.31" is a stronger result than a
 silent higher mean.*
 
-## Feature-engineering verification — Iteration 2
+## Feature experiments — Iteration 2
 
-Rows 2-FE1–2-FE3 are feature-engineering experiments within the course's Iteration 2
-(Real DSP & features), alongside the preprocessing work already recorded in row 2.
-They do not renumber the course's later validation and delivery milestones. Dates above
-refer to the verification runs, not the original experiment dates.
+The following feature experiments were carried out as part of Iteration 2 and verified
+on 2026-11-07 using Ninapro DB1 Exercise E1, S1–S5 (13,875 windows). Compared against
+the unchanged 50-feature baseline using the same Random Forest and group-aware
+evaluation harness, with `preprocess="none"`, `select="none"` and `seed=0`.
+Within-subject evaluation grouped by repetition; new-subject evaluation used
+leave-one-subject-out.
 
-### Shared configuration
+| Experiment | Features | Within-subject mean macro-F1 (SD) | New-subject mean macro-F1 (SD) | Decision |
+|---|---:|---:|---:|---|
+| Baseline verification | 50 | 0.790 (0.054) | 0.161 (0.043) | Retained as the reference for these feature comparisons. Earlier baseline results are preserved. |
+| RMS ablation | 40 | 0.779 (0.052) | 0.162 (0.039) | RMS retained in the baseline. Removing it reduced within-subject performance without a clear new-subject benefit. |
+| Adding IQR | 60 | 0.783 (0.051) | 0.165 (0.043) | Retained as an experimental candidate, not yet selected as the final default. The small new-subject gain was inconsistent across subjects; its interaction with preprocessing has not been tested. |
 
-All comparisons used Ninapro DB1 Exercise E1, S1–S5: 13,875 windows of 20 samples
-and 10 channels at 100 Hz, with a 15-sample step. The existing Random Forest baseline
-and evaluation harness were used with `preprocess="none"`, `select="none"`, `seed=0`
-and the default `imbalance="balanced"`. Within-subject evaluation grouped by repetition;
-new-subject evaluation used leave-one-subject-out. Only the feature set changed.
-No additional smoothing was used, so these comparisons isolate the feature changes.
-S23–S27 were not downloaded or used.
+Mean and SD are reported across five subjects. Pooled MAV–RMS correlations ranged
+from 0.999392 to 0.999916. Adding IQR improved three of five test subjects, with a
+mean paired macro-F1 change of +0.00445. These results apply to S1–S5; planned
+S1–S10 reruns will be documented separately.
 
-Verification environment: Python 3.11.18, NumPy 2.2.6, SciPy 1.15.3 and
-scikit-learn 1.7.2, with dependencies installed from both project requirements files.
-Ordinary loading and two cache loads were checked for exact equality of EMG windows,
-labels, repetition identifiers and subject groups. The second cache load reused the file.
-The existing cache key includes window settings and file metadata; loader-code changes
-still require a manual cache-version increment.
-
-Three feature configurations were evaluated: the baseline, without RMS, and baseline
-plus IQR. The correlation analysis was descriptive; the per-subject IQR analysis
-re-evaluated the same two feature sets rather than introducing another configuration.
-This is the count for this verification batch, not the total number of configurations
-previously tried by the team, and not a retrospectively declared comparison budget.
-
-### Supporting experiment — MAV/RMS correlation
-
-Pearson correlations were computed on the pooled 50-feature matrix across S1–S5.
-
-| Channel | MAV–RMS correlation |
-|---|---:|
-| 1 | 0.999884 |
-| 2 | 0.999670 |
-| 3 | 0.999827 |
-| 4 | 0.999876 |
-| 5 | 0.999476 |
-| 6 | 0.999392 |
-| 7 | 0.999859 |
-| 8 | 0.999916 |
-| 9 | 0.999786 |
-| 10 | 0.999902 |
-
-These results confirm strong linear overlap between MAV and RMS in the pooled data;
-they are not within-subject correlations. Correlation alone did not establish that RMS
-could be removed without affecting classification, so the ablation informed that decision.
-
-### Supporting experiment — per-subject IQR comparison
-
-New-subject macro-F1, with each subject excluded from training in its test fold:
-
-| Held-out development subject | Baseline | Baseline + IQR | Change |
-|---|---:|---:|---:|
-| S1 | 0.2100 | 0.2081 | −0.0019 |
-| S2 | 0.0973 | 0.0953 | −0.0020 |
-| S3 | 0.1865 | 0.1913 | +0.0048 |
-| S4 | 0.1626 | 0.1634 | +0.0008 |
-| S5 | 0.1464 | 0.1669 | +0.0205 |
-
-Three subjects improved and two worsened. The mean paired macro-F1 change was +0.00445,
-with the largest gain in S5. The separate per-subject script agreed with the existing
-evaluation harness for both macro-F1 and kappa. These results support keeping IQR as
-an experimental candidate; they do not establish a consistent benefit or a benefit
-when combined with moving-average preprocessing.
-
-### Pooled metrics and earlier results
-
-Pooled metrics use all out-of-fold predictions together. The iteration rows instead
-lead with the mean and SD of the five subject-level scores. These are different
-aggregations and should not be substituted for each other.
-
-| Configuration | Within-subject pooled macro-F1 | Within-subject pooled kappa | New-subject pooled macro-F1 | New-subject pooled kappa |
-|---|---:|---:|---:|---:|
-| Reference baseline | 0.784 | 0.766 | 0.192 | 0.119 |
-| Without RMS | 0.773 | 0.755 | 0.194 | 0.122 |
-| Baseline + IQR | 0.778 | 0.760 | 0.199 | 0.127 |
-
-The original feature-engineering summary reported pooled macro-F1 of 0.774 within-subject
-and 0.193 new-subject without RMS (kappa 0.755 and 0.120), versus 0.773 and 0.194
-(kappa 0.755 and 0.122) in this verification. The original IQR pooled values match this
-verification to three decimals. Its earlier reported mean per-subject change was about
-+0.0047, versus +0.00445 here. The team's earlier baseline notebook reported pooled
-macro-F1 of 0.783 and 0.191. These historical values are preserved; small differences
-have not been assigned a verified cause or interpreted as improvements.
-
-### Run records and assistance disclosure
-
-Local run records were saved as `baseline_s1_s5.json`, `without_rms_s1_s5.json`,
-`with_iqr_s1_s5.json`, `feature_correlations.csv`, `iqr_per_subject_results.csv`
-and `remaining_experiments_log.txt`, with correlation and per-subject figures.
-The JSON records include pipeline/data hashes, environment and configuration details.
-These outputs and the verification runners remain outside the repository and are not
-committed. The four experiment scripts, shared helper and verification log were committed
-in 46a398b (`Iteration 2: adapt and verify EMG feature experiments`).
-
-Codex was used to set up the environment, adapt paths and import behavior, add shared
-configuration/data checks, adjust configuration forwarding and result output in the
-experiment scripts, execute the existing experiments, and format this log from measured
-outputs and Mostafa's stated decisions. The core adapter evaluation loop was not changed.
-Mostafa has reviewed the six changed files. Team review of the adaptations against
-the course's agentic-tool rules remains pending before integration; this disclosure
-does not replace that review. RMS retention
-and IQR's candidate status were discussed with Mostafa; final team selection remains open.
+Code and verification log: `46a398b`; commit-reference update: `e6a0690`;
+original experiments: `32acf7f`; baseline pipeline: `0741891`.
+Detailed methods, pooled metrics, per-subject results and assistance disclosure are
+recorded in [FEATURE_EXPERIMENTS.md](FEATURE_EXPERIMENTS.md).
 
 ## Leakage demonstration — Iteration 1
 
@@ -216,7 +130,7 @@ add rows as the pipeline grows, and note the alternative you rejected.
 |---|---|---|---|---|---|
 | 1. Data loading | Real Ninapro DB1, exercise E1, 5 subjects | Synthetic smoke data | Real data was used to establish the actual baseline required for the EMG track | 1 | — |
 | 2. Preprocessing | Identity preprocessing (`preprocess="none"`) retained as baseline; fixed 3-sample causal moving average (`preprocess="moving_average"`) implemented as an optional configuration | No additional smoothing; subject-specific normalization (not yet implemented or evaluated) | Ninapro DB1 already contains rectified, low-pass-filtered EMG envelopes. A fixed causal moving average was tested to reduce short-term fluctuations without fitting parameters across subjects or accessing future samples. Results showed a small pooled new-subject improvement but no convincing overall benefit. | 2 | Not yet — final preprocessing selection pending |
-| 3. Feature extraction | Original 50-feature reference retained, including RMS; ten appended IQR features retained as an experimental candidate | Removing RMS (40 features); adding IQR (60 features) | RMS removal reduced within-subject performance without a clear new-subject benefit; IQR gave a small, inconsistent new-subject gain and has not been tested with the team's preprocessing. | 2 (FE2–FE3) | No final default change — combined preprocessing/feature choice pending |
+| 3. Feature extraction | Original 50-feature reference retained, including RMS; ten appended IQR features retained as an experimental candidate | Removing RMS (40 features); adding IQR (60 features) | RMS removal reduced within-subject performance without a clear new-subject benefit; IQR gave a small, inconsistent new-subject gain and has not been tested with the team's preprocessing. | 2 | No final default change — combined preprocessing/feature choice pending |
 | 4. Feature selection | *e.g.* `select="none"` | ANOVA `SelectKBest`, tree importances | 14 features vs. ~1 800 epochs — pruning risked more than it saved | 1 | *e.g.* **yes, iter 4** — `select_k=20` was a no-op (harness said so); switched to `k=6` |
 | 5. Classification, incl. `imbalance` | *e.g.* `imbalance="balanced"` | `"none"`, `"resample"`, `"threshold"` | *(if you kept the default, say you looked and why — a silent default earns nothing)* |  |  |
 | 6. Inference |  |  |  |  |  |
@@ -245,7 +159,7 @@ between iterations. Record what actually happened.
 |---|---|---|---|
 | 1 | Erina | Baseline execution on real Ninapro DB1 data; evaluation of within-subject and new-subject macro-F1; results logging | Vera |
 | 2 | Erina | Implemented configurable causal moving-average preprocessing; verified baseline preservation, numerical correctness, causality within windows, non-mutation, and integration with the real Ninapro feature pipeline; evaluated both required classification modes and documented the results. | Pending team review |
-| 2 | Mostafa | Original RMS ablation, MAV/RMS correlation, IQR implementation and per-subject IQR investigation; discussed decisions to retain RMS and keep IQR experimental. Verification on the updated setup and documentation were assisted by Codex as disclosed above. | Pending team review |
+| 2 | Mostafa | Original RMS ablation, MAV/RMS correlation, IQR implementation and per-subject IQR investigation; discussed decisions to retain RMS and keep IQR experimental. Verification on the updated setup and documentation were assisted by Codex as disclosed in FEATURE_EXPERIMENTS.md. | Pending team review |
 
 ## Final numbers (fill in once, at the end)
 
