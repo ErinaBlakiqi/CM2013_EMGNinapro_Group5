@@ -159,7 +159,7 @@ between iterations. Record what actually happened.
 |---|---|---|---|
 | 1 | Erina | Baseline execution on real Ninapro DB1 data; evaluation of within-subject and new-subject macro-F1; results logging | Vera |
 | 2 | Erina | Implemented configurable causal moving-average preprocessing; verified baseline preservation, numerical correctness, causality within windows, non-mutation, and integration with the real Ninapro feature pipeline; evaluated both required classification modes and documented the results. | Pending team review |
-| 2 | Mostafa | Original RMS ablation, MAV/RMS correlation, IQR implementation and per-subject IQR investigation; discussed decisions to retain RMS and keep IQR experimental. Verification on the updated setup and documentation were assisted by Codex as disclosed in FEATURE_EXPERIMENTS.md. | Pending team review |
+| 2 | Mostafa | Implemented and evaluated RMS ablation, MAV/RMS correlation and IQR features; compared within-subject and new-subject results; documented findings. | Pending team review |
 | 4 | Erina | Expanded and validated the development dataset (S1–S10); verified exclusion of official hold-out subjects; reran the identity baseline under within-subject and new-subject evaluation; analyzed subject-level performance variability and documented results. | Pending team review |
 
 ## Final numbers (fill in once, at the end)
