@@ -188,11 +188,71 @@ class EMGNinaproTrack(TrackAdapter):
         and `filtfilt` is the right tool for it. What is forbidden is quoting an
         offline number as a real-time claim without saying so. State which regime
         each number belongs to, the same way you state the split unit.
+
+        Supported cfg["preprocess"] values:
+        "none":
+            Identity preprocessing (default).
+
+        "moving_average":
+            Three-sample causal moving average, independently
+            applied within each window.
+
+        "rms_per_channel":
+            P1: Normalize each channel independently using
+            its RMS over the current 20-sample window.
+
+        "rms_global":
+            P2: Normalize all channels using one RMS computed
+        across the current window's samples and channels.
+
+        P1 and P2 use an epsilon of 1e-8 for numerical stability.
+        Both operate independently on each window without fitting
+        statistics across subjects or recordings.
+
+        All methods preserve the original recording data.
+
+        Real-time considerations:
+            All methods use only samples within the current window.
+            P1 and P2 require the complete window before its
+            normalization factor can be calculated. They introduce
+            no future-window dependency, but their practical
+            latency must be considered in a streaming application.
+
+        No preprocessing method is assumed to improve
+        classification performance without downstream evaluation.
         """
         method = (cfg or {}).get("preprocess", "none")
 
         if method == "none":
             return rec
+
+        if method == "rms_per_channel":
+            windows = np.asarray(rec.epochs["emg"], dtype=float)
+
+            rms = np.sqrt(
+                np.mean(windows ** 2, axis=1, keepdims=True)
+            )
+
+            normalized = windows / np.maximum(rms, 1e-8)
+
+            new_rec = copy.copy(rec)
+            new_rec.epochs = dict(rec.epochs)
+            new_rec.epochs["emg"] = normalized
+            return new_rec
+
+        if method == "rms_global":
+            windows = np.asarray(rec.epochs["emg"], dtype=float)
+
+            rms = np.sqrt(
+                np.mean(windows ** 2, axis=(1, 2), keepdims=True)
+            )
+
+            normalized = windows / np.maximum(rms, 1e-8)
+
+            new_rec = copy.copy(rec)
+            new_rec.epochs = dict(rec.epochs)
+            new_rec.epochs["emg"] = normalized
+            return new_rec
 
         if method != "moving_average":
             raise ValueError(f"Unsupported preprocessing method: {method}")
