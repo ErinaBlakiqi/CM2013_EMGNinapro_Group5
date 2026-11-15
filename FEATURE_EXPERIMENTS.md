@@ -2,7 +2,7 @@
 
 The following feature experiments were carried out as part of Iteration 2 and verified
 on 2026-11-07 using Ninapro DB1 Exercise E1, S1–S5. The dates below refer to the
-verification runs. Planned S1–S10 reruns will be documented separately.
+verification runs.
 A summary is recorded in [RESULTS.md](RESULTS.md).
 
 ## Experiment log
