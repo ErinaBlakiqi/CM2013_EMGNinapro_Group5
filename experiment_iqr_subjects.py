@@ -55,12 +55,12 @@ def evaluate_per_subject(track, recs, cfg=None):
 
 
 def main(argv=None):
-    args = arguments("Per-subject IQR comparison on S1-S5", argv)
+    args = arguments("Per-subject IQR comparison on the selected development cohort", argv)
     # Load the same real Ninapro data
     baseline_track = EMGNinaproTrack()
     iqr_track = IQRTrack()
 
-    recs = load_development(baseline_track, args.data_dir)
+    recs = load_development(baseline_track, args.data_dir, args.subjects)
 
     if not recs:
         raise RuntimeError("No recordings found.")

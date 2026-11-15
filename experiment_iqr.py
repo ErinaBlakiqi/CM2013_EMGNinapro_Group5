@@ -20,7 +20,7 @@ def main(argv=None):
     args = arguments(__doc__, argv)
     baseline = EMGNinaproTrack()
     modified = IQRTrack()
-    recs = load_development(baseline, args.data_dir)
+    recs = load_development(baseline, args.data_dir, args.subjects)
     X_base, _, _ = baseline.extract_features(recs[0])
     X_modified, _, _ = modified.extract_features(recs[0])
     assert X_base.shape[1] == 50 and X_modified.shape[1] == 60

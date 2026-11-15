@@ -58,8 +58,21 @@ leave-one-subject-out.
 
 Mean and SD are reported across five subjects. Pooled MAV–RMS correlations ranged
 from 0.999392 to 0.999916. Adding IQR improved three of five test subjects, with a
-mean paired macro-F1 change of +0.00445. These results apply to S1–S5; planned
-S1–S10 reruns will be documented separately.
+mean paired macro-F1 change of +0.00445.
+
+### S1–S10 rerun
+
+On 2026-11-15, repeated the three feature configurations on Ninapro DB1 E1
+(S1–S10, 27,575 windows) using the same Random Forest and evaluation settings.
+
+| Experiment | Features | Within-subject mean macro-F1 (SD) | New-subject mean macro-F1 (SD) | Decision |
+|---|---:|---:|---:|---|
+| Baseline verification | 50 | 0.803 (0.044) | 0.158 (0.060) | Retained as the reference for these feature comparisons. |
+| RMS ablation | 40 | 0.794 (0.044) | 0.158 (0.057) | RMS retained after within-subject performance decreased and new-subject mean macro-F1 stayed at 0.158. |
+| Adding IQR | 60 | 0.799 (0.043) | 0.158 (0.059) | Kept as an experimental option. New-subject scores improved for four of ten subjects. |
+
+See [FEATURE_EXPERIMENTS.md](FEATURE_EXPERIMENTS.md#s1s10-rerun) for pooled scores,
+per-subject spread and run details.
 
 Code and verification log: `46a398b`; commit-reference update: `e6a0690`;
 original experiments: `32acf7f`; baseline pipeline: `0741891`.

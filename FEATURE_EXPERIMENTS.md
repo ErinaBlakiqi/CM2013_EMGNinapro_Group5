@@ -113,3 +113,28 @@ were merged into main. Team review against the course's agentic-tool rules remai
 pending. RMS is retained in the reference baseline and IQR remains an experimental
 candidate; final team selection remains open.
 
+## S1–S10 rerun
+
+On 2026-11-15, reran the 50-feature baseline, RMS ablation and baseline + IQR
+on Ninapro DB1 E1 (S1–S10, 27,575 windows). All three used the supplied Random
+Forest with `preprocess="none"`, `select="none"` and `seed=0`. Within-subject
+folds grouped windows by repetition, and new-subject evaluation held out one
+subject at a time.
+
+| Experiment | Features | Within-subject mean macro-F1 (SD, range) | New-subject mean macro-F1 (SD, range) | Pooled macro-F1 (within / new) | Pooled kappa (within / new) |
+|---|---:|---|---|---|---|
+| Baseline | 50 | 0.803 (0.044, 0.743–0.880) | 0.158 (0.060, 0.071–0.255) | 0.799 / 0.183 | 0.782 / 0.116 |
+| Without RMS | 40 | 0.794 (0.044, 0.732–0.866) | 0.158 (0.057, 0.073–0.253) | 0.791 / 0.186 | 0.773 / 0.119 |
+| Baseline + IQR | 60 | 0.799 (0.043, 0.737–0.869) | 0.158 (0.059, 0.079–0.261) | 0.795 / 0.183 | 0.778 / 0.115 |
+
+Pooled MAV–RMS correlations ranged from 0.999475 to 0.999898 across the ten
+channels. Removing RMS lowered within-subject macro-F1 and raised pooled
+new-subject macro-F1 by 0.003, with both new-subject means rounding to 0.158.
+Adding IQR improved new-subject macro-F1 for four subjects and reduced it for
+six, with a mean paired change of −0.00006. The 50-feature baseline was
+retained for subsequent comparisons.
+
+Run base: `71d72d7` with the local S1–S10 runner changes described in
+[RERUN_S1_S10.md](RERUN_S1_S10.md). The local run records include per-subject
+IQR scores, input and source hashes, dependency versions and the four run logs.
+
