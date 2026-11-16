@@ -419,3 +419,39 @@ interference to remove, and further low-pass filtering was already tested
 - A small, broad bump around 10–11 Hz is visible on some channels (most clearly
   CH6). It is not a narrow interference peak and lies in the typical range of
   physiological tremor (about 8–12 Hz), so it was not filtered.
+
+
+  ### Moving average rerun on S1–S10 (2026-11-17)
+
+The 3-sample causal moving average (Iteration 2) had only been evaluated on
+S1–S5. It was rerun on S1–S10 with the same setup as P1/P2 so that all
+preprocessing configurations are compared on the same development subjects
+(`experiment_moving_average_s1_s10.py`, log `moving_average_s1_s10_run.txt`).
+
+| Configuration | Within-subject mean macro-F1 (SD, range) | New-subject mean macro-F1 (SD, range) | Pooled within / new macro-F1 |
+|---|---|---|---|
+| Baseline (identity) | 0.802 (0.045, 0.742–0.883) | 0.158 (0.060, 0.063–0.250) | 0.799 / 0.185 |
+| Moving average | 0.799 (0.043, 0.742–0.874) | 0.159 (0.063, 0.062–0.254) | 0.797 / 0.187 |
+
+**Paired change (moving average − baseline):** within −0.002 (SD 0.004,
+SE 0.0014, 5/10 improved); new-subject +0.001 (SD 0.005, SE 0.0016,
+5/10 improved). No measurable difference in either mode.
+
+**Interpretation:** the small pooled new-subject gain on S1–S5 (+0.014) did not
+replicate with ten subjects, so it is treated as noise. The envelope is already
+low-pass filtered, and the spectrum check confirmed little high-frequency
+content, so extra smoothing has little left to remove.
+
+**Decision:** moving average not adopted.
+
+## Preprocessing summary (S1–S10, same folds)
+
+| Configuration | Paired new-subject change vs baseline | Decision |
+|---|---|---|
+| Moving average | +0.001 (0.9 SE) | Not adopted: no measurable difference |
+| P1 per-channel window RMS | −0.024 (≈2.5 SE), within −0.274 | Rejected: removes gesture information |
+| P2 global window RMS | −0.012 (≈1.2 SE) | Not adopted: no measurable difference |
+| P3 per-subject calibration* | +0.037 (2.6 SE), 8/10 improved | **Adopted** |
+| No denoising filter | spectrum check: no noise to remove | No filter applied |
+
+*P3 compared on repetitions 2–10, with repetition 1 used as calibration data for both configurations.
