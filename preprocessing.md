@@ -330,3 +330,33 @@ differences.
 preprocessing remains the reference. Next: per-subject calibration (P3), which
 targets the between-subject amplitude scale found in the diagnostics while
 preserving within-subject amplitude differences between gestures.
+
+### Iteration 5 — P3 per-subject calibration plan (registered before evaluation, 2026-11-16)
+
+**Motivation:** Per-window normalization (P1, P2) did not reduce the
+within/new-subject gap: P1 destroyed gesture information and P2 had no
+measurable effect. The amplitude diagnostics showed large between-subject
+channel-amplitude differences (CH1 mean amplitude 0.0027–0.80 across S1–S10).
+P3 targets this subject-level scale directly while keeping the amplitude
+differences between gestures within a subject.
+
+**Method (`preprocess="subject_calibration"`):** for each subject, each channel
+is divided by its RMS over all samples of that subject's calibration
+repetition (repetition 1 of all 12 gestures). No other subject and no labels
+are used. Deployment implication: a new user performs each gesture once as a
+calibration session before use.
+
+**Evaluation:** S1–S10, 50 baseline features, default Random Forest,
+`select="none"`, seed 0, both modes. Repetition-1 windows are removed from
+training and scoring for **both** baseline and P3, so they are compared on
+identical windows (repetitions 2–10) and identical folds. This run reports its
+own baseline.
+
+**Expected property:** within-subject scores should be unchanged. A constant
+per-channel scale within one subject does not change how a Random Forest ranks
+that subject's feature values, so P3 can only affect new-subject results.
+
+**Decision rule:** adopt P3 only if its paired new-subject change exceeds about
+2 SE across subjects (paired SD / √10).
+
+**Budget:** 5th and final preprocessing configuration.
