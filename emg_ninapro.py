@@ -205,7 +205,14 @@ class EMGNinaproTrack(TrackAdapter):
             P2: Normalize all channels using one RMS computed
         across the current window's samples and channels.
 
-        P1 and P2 use an epsilon of 1e-8 for numerical stability.
+        "subject_calibration":
+            P3: Per-subject, per-channel scaling. Each channel is divided
+            by its RMS over the subject's calibration repetition
+            (repetition 1 of every gesture). Deployment implies a
+            calibration session: a new user performs each gesture once
+            before use. Uses no other subject and no labels.
+
+        P1, P2 and P3 use an epsilon of 1e-8 for numerical stability.
         Both operate independently on each window without fitting
         statistics across subjects or recordings.
 
@@ -252,6 +259,37 @@ class EMGNinaproTrack(TrackAdapter):
             new_rec = copy.copy(rec)
             new_rec.epochs = dict(rec.epochs)
             new_rec.epochs["emg"] = normalized
+            return new_rec
+
+        if method == "subject_calibration":
+            # P3: per-subject, per-channel calibration scaling.
+            # One Recording = one subject's E1 session. The scale of each
+            # channel is the RMS over ALL samples of that subject's calibration
+            # repetition (the lowest repetition number, i.e. repetition 1 of
+            # every gesture). No other subject, no labels, and no data outside
+            # the calibration repetition are used to compute the scale.
+            windows = np.asarray(rec.epochs["emg"], dtype=float)
+            reps = np.asarray(rec.meta.get("rep", []))
+            if reps.shape[0] != windows.shape[0]:
+                raise ValueError("subject_calibration needs rec.meta['rep'] "
+                                 "with one repetition number per window.")
+            if "calibration_emg" in rec.meta:
+                # Calibration windows supplied separately (evaluation setup in
+                # experiment_p3_calibration.py, where they are not scored).
+                calib = np.asarray(rec.meta["calibration_emg"], dtype=float)
+                calib_rep = int(rec.meta.get("calibration_rep", 1))
+            else:
+                calib_rep = int(reps.min())
+                calib = windows[reps == calib_rep]                 # [n_cal, 20, 10]
+            scale = np.sqrt(np.mean(calib ** 2, axis=(0, 1)))      # [10] per channel
+            normalized = windows / np.maximum(scale, 1e-8)[None, None, :]
+
+            new_rec = copy.copy(rec)
+            new_rec.epochs = dict(rec.epochs)
+            new_rec.epochs["emg"] = normalized
+            new_rec.meta = dict(rec.meta)
+            new_rec.meta["calibration_rep"] = calib_rep
+            new_rec.meta["calibration_scale"] = scale
             return new_rec
 
         if method != "moving_average":
