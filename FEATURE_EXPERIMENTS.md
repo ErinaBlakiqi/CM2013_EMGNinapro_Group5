@@ -138,3 +138,26 @@ Run base: `71d72d7` with the local S1–S10 runner changes described in
 [RERUN_S1_S10.md](RERUN_S1_S10.md). The local run records include per-subject
 IQR scores, input and source hashes, dependency versions and the four run logs.
 
+## Relative RMS on S1–S10
+
+On 2026-11-16, compared regular RMS with relative RMS on the same 27,575 E1 windows and the same Random Forest and evaluation settings. For each window, each channel's RMS was divided by the sum of all ten RMS values. A zero sum produces ten zeros. Both feature sets contain 50 columns.
+
+| Configuration | Features | Within-subject mean (SD, range) | New-subject mean (SD, range) | Pooled macro-F1 (within / new) | Pooled kappa (within / new) |
+|---|---:|---|---|---|---|
+| Baseline | 50 | 0.803 (0.044, 0.743–0.880) | 0.158 (0.060, 0.071–0.255) | 0.799 / 0.183 | 0.782 / 0.116 |
+| Relative RMS | 50 | 0.816 (0.042, 0.753–0.888) | 0.164 (0.054, 0.091–0.260) | 0.813 / 0.19 | 0.797 / 0.122 |
+
+New-subject macro-F1 increased for 9 subjects and decreased for 1 (mean paired change +0.00547).
+
+| Subject | Baseline macro-F1 | Relative RMS macro-F1 | Change |
+|---|---:|---:|---:|
+| S1 | 0.18787 | 0.18937 | +0.00150 |
+| S2 | 0.08870 | 0.09185 | +0.00314 |
+| S3 | 0.18530 | 0.19411 | +0.00881 |
+| S4 | 0.21961 | 0.19010 | -0.02951 |
+| S5 | 0.18899 | 0.20548 | +0.01649 |
+| S6 | 0.15031 | 0.15594 | +0.00563 |
+| S7 | 0.07097 | 0.09135 | +0.02038 |
+| S8 | 0.25485 | 0.25955 | +0.00470 |
+| S9 | 0.09415 | 0.11166 | +0.01751 |
+| S10 | 0.14266 | 0.14869 | +0.00602 |

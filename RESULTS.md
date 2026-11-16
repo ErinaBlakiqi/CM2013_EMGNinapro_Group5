@@ -75,6 +75,11 @@ On 2026-11-15, repeated the three feature configurations on Ninapro DB1 E1
 See [FEATURE_EXPERIMENTS.md](FEATURE_EXPERIMENTS.md#s1s10-rerun) for pooled scores,
 per-subject spread and run details.
 
+
+#### Relative RMS on S1–S10
+
+Replaced the ten regular RMS columns with per-window channel shares. Within-subject mean macro-F1 (SD, range) was 0.816 (0.042, 0.753–0.888) and new-subject mean macro-F1 was 0.164 (0.054, 0.091–0.260). New-subject macro-F1 increased for 9 subjects and decreased for 1 (mean paired change +0.00547). See [FEATURE_EXPERIMENTS.md](FEATURE_EXPERIMENTS.md#relative-rms-on-s1s10) for the paired comparison.
+
 Code and verification log: `46a398b`; commit-reference update: `e6a0690`;
 original experiments: `32acf7f`; baseline pipeline: `0741891`.
 Detailed methods, pooled metrics, per-subject results and assistance disclosure are
