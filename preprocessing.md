@@ -390,3 +390,32 @@ placement / activation pattern differences). Deployment requires a calibration
 session. Result is from the development set; to be confirmed once on S11–S22.
 For the hold-out predictions, each subject's scale is computed from its own
 repetition 1, and those windows are also predicted.
+
+### Spectrum check — is there noise to filter? (2026-11-17)
+
+**Purpose:** decide whether any denoising filter (powerline notch, band-pass,
+low-pass) is justified, by first checking the spectrum. Not a configuration
+comparison; nothing was selected from it.
+
+**Method:** Welch PSD (2.56 s segments, 0.39 Hz resolution) of the continuous
+10-channel E1 envelope of each development subject S1–S10; median across
+subjects per channel. Script `experiment_spectrum_check.py`, figure
+`spectrum_check.png`.
+
+**Findings:**
+- No powerline peak: at fs = 100 Hz, 50 Hz is the Nyquist frequency. PSD in
+  49–50 Hz relative to the 40–48 Hz level had median ratio 0.92 (max 4.36);
+  a powerline peak would be an order of magnitude or more above it.
+- Power is concentrated at low frequencies: median 89.4% below 2 Hz and
+  about 98% below 10 Hz; only 0.01% in 45–50 Hz.
+- The spectrum decreases smoothly with no narrow peaks, consistent with the
+  rectified, low-pass filtered envelope that DB1 provides.
+- Channels differ strongly in overall power (CH1, CH4, CH5, CH6 lowest),
+  matching the amplitude diagnostics.
+
+**Decision:** no denoising filter applied. There is no powerline or narrowband
+interference to remove, and further low-pass filtering was already tested
+(3-sample moving average) with no measurable benefit.
+- A small, broad bump around 10–11 Hz is visible on some channels (most clearly
+  CH6). It is not a narrow interference peak and lies in the typical range of
+  physiological tremor (about 8–12 Hz), so it was not filtered.
