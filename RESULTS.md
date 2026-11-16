@@ -152,11 +152,34 @@ add rows as the pipeline grows, and note the alternative you rejected.
 | 1. Data loading | Ninapro DB1, exercise E1, expanded from S1–S5 to S1–S10; official hold-out S23–S27 excluded | Synthetic smoke data; original five-subject cohort | Expanded the development cohort to obtain a more informative assessment of inter-subject variability while preserving the official hold-out. All 27,575 windows loaded successfully and the hold-out exclusion check passed. | 1, 3 | Yes — expanded the development cohort in Iteration 3; original baseline results preserved |
 | 2. Preprocessing | Identity preprocessing (`preprocess="none"`) retained as baseline; fixed 3-sample causal moving average (`preprocess="moving_average"`) implemented as an optional configuration | No additional smoothing; subject-specific normalization (not yet implemented or evaluated) | Ninapro DB1 already contains rectified, low-pass-filtered EMG envelopes. A fixed causal moving average was tested to reduce short-term fluctuations without fitting parameters across subjects or accessing future samples. Results showed a small pooled new-subject improvement but no convincing overall benefit. | 2 | Not yet — final preprocessing selection pending |
 | 2. Preprocessing | Identity (`none`) retained as the reference; `moving_average`, `rms_per_channel` (P1), and `rms_global` (P2) available as optional configurations | Fixed causal smoothing; per-window channel-wise RMS normalization; per-window global RMS normalization | Amplitude diagnostics motivated P1/P2. Both passed correctness and real-data validation, but downstream classification performance has not yet been compared. No final preprocessing method selected. | 2–4 | Yes — added P1/P2 following amplitude diagnostics; final selection pending |
+| 2. Preprocessing | Identity (`none`) retained as the reference; P1 rejected; P2 not adopted | P1 per-channel window RMS; P2 global window RMS; 3-sample causal moving average | P1 lowered within-subject macro-F1 by 0.274 (0/10 subjects improved) and did not help new subjects; P2 and moving average changed scores by much less than the across-subject SD, so the simpler identity baseline was kept. | 6 | Yes — P1/P2 were added after the amplitude diagnostics, then rejected on downstream results; per-subject calibration (P3) planned next |
 | 3. Feature extraction | Original 50-feature reference retained, including RMS; ten appended IQR features retained as an experimental candidate | Removing RMS (40 features); adding IQR (60 features) | RMS removal reduced within-subject performance without a clear new-subject benefit; IQR gave a small, inconsistent new-subject gain and has not been tested with the team's preprocessing. | 2 | No final default change — combined preprocessing/feature choice pending |
 | 4. Feature selection | *e.g.* `select="none"` | ANOVA `SelectKBest`, tree importances | 14 features vs. ~1 800 epochs — pruning risked more than it saved | 1 | *e.g.* **yes, iter 4** — `select_k=20` was a no-op (harness said so); switched to `k=6` |
 | 5. Classification, incl. `imbalance` | Provisional Random Forest: n_estimators=200, min_samples_leaf=10, max_depth=10. max_features="log2", class_weight="balanced" | Original RF baseline; alternative leaf sizes (1, 2, 5, 15, 20, 30), tree depths (None, 20, 30), and feature settings ("sqrt", 0.5, 1.0) |  Hyperparameter tuning on S1–S10 improved mean new-subject macro-F1 from 0.160 (SD 0.060) to 0.175 (SD 0.068). The improvement is preliminary and must be evaluated in the combined pipeline | 2 | No - final model selection pending |
 | 6. Inference |  |  |  |  |  |
 | 7. Reporting |  |  |  |  |  |
+
+
+## Our approach to selection effects
+
+**Development set:** Ninapro DB1 E1 subjects S1–S10 are the development set.
+All design comparisons (preprocessing, features, classifier settings) are made
+on S1–S10 only, using the same within-subject (repetition-grouped) and
+new-subject (subject-grouped) folds.
+
+**Confirmation set:** training subjects S11–S22 are reserved and are not used
+for any design decision. Once the final pipeline is chosen, it and the
+supplied baseline are run **once** on S11–S22 and on all 22 training subjects,
+and those results are reported as the final cross-validated estimate.
+
+**Official hold-out:** S23–S27 are used only once, for `predictions.csv`,
+after `EXPECTED_SCORE.md` is committed.
+
+**Preprocessing configurations compared on S1–S10 so far:** 4 — identity,
+3-sample causal moving average, P1 per-channel window RMS, P2 global window
+RMS. Planned: P3 per-subject calibration (5 in total). Feature and classifier
+comparisons are counted separately by their owners and summed in the final
+report.
 
 ## Revisions — the ones that went **backwards** (Criterion 9's actual evidence)
 
@@ -181,10 +204,11 @@ between iterations. Record what actually happened.
 |---|---|---|---|
 | 1 | Erina | Baseline execution on real Ninapro DB1 data; evaluation of within-subject and new-subject macro-F1; results logging | Vera |
 | 2 | Erina | Implemented configurable causal moving-average preprocessing; verified baseline preservation, numerical correctness, causality within windows, non-mutation, and integration with the real Ninapro feature pipeline; evaluated both required classification modes and documented the results. | Pending team review |
-| 2 | Mostafa | Implemented and evaluated RMS ablation, MAV/RMS correlation and IQR features; compared within-subject and new-subject results; documented findings. | Pending team review |
+| 3 | Mostafa | Implemented and evaluated RMS ablation, MAV/RMS correlation and IQR features; compared within-subject and new-subject results; documented findings. | Pending team review |
 | 4 | Erina | Expanded and validated the development dataset (S1–S10); verified exclusion of official hold-out subjects; reran the identity baseline under within-subject and new-subject evaluation; analyzed subject-level performance variability and documented results. | Pending team review |
 | 5 | Erina | Investigated inter-subject and inter-channel EMG amplitude variation; implemented P1 per-channel RMS and P2 global RMS normalization; validated both on 27,575 real windows; verified existing preprocessing behavior; documented methods, limitations, and experimental decisions. Commit: `17373b7`. | Pending team review |
-| 2 | Vera | Conducted Random Forest hyperparameter tuning on Ninapro DB1 E1 using S1–S10 and Leave-One-Subject-Out evaluation. Tested min_samples_leaf, max_depth, and max_features across four experiments. Identified a provisional configuration achieving mean macro-F1 0.175 (SD 0.068), compared with baseline 0.160 (SD 0.060). Documented results and model selection. | Pending team review |
+| 6 | Vera | Conducted Random Forest hyperparameter tuning on Ninapro DB1 E1 using S1–S10 and Leave-One-Subject-Out evaluation. Tested min_samples_leaf, max_depth, and max_features across four experiments. Identified a provisional configuration achieving mean macro-F1 0.175 (SD 0.068), compared with baseline 0.160 (SD 0.060). Documented results and model selection. | Pending team review |
+| 7 | Erina | Ran the downstream classification comparison of identity vs P1 vs P2 in both evaluation modes on S1–S10 (`experiment_normalization_evaluation.py`); paired per-subject analysis; rejected P1, did not adopt P2; documented the development/confirmation subject split. | Pending team review |
 
 ## Final numbers (fill in once, at the end)
 
