@@ -296,3 +296,37 @@ After P2 normalization, CH7 remained the strongest channel (RMS 2.6535), while C
 **Limitation:** This comparison is descriptive and based on one illustrative window. It does not establish which normalization method improves gesture classification or cross-subject generalization.
 
 **Status:** Signal-level comparison completed. Both methods are ready for downstream evaluation by the team.
+
+### Iteration 4 — Downstream classification of P1 and P2 (2026-11-16)
+
+**Setup:** Ninapro DB1 E1, S1–S10 (27,575 windows, data folder ~/cm2013_data/train).
+Only `preprocess` changed; 50 baseline features, `select="none"`, default Random
+Forest, `seed=0`, identical folds for all three configurations. Script:
+`experiment_normalization_evaluation.py`; log: `normalization_eval_run.txt`.
+
+| Configuration | Within-subject mean macro-F1 (SD, range) | New-subject mean macro-F1 (SD, range) | Pooled within / new macro-F1 | Pooled within / new κ |
+|---|---|---|---|---|
+| Baseline (identity) | 0.802 (0.045, 0.742–0.883) | 0.158 (0.060, 0.063–0.250) | 0.799 / 0.185 | 0.781 / 0.116 |
+| P1 per-channel window RMS | 0.528 (0.079, 0.395–0.637) | 0.134 (0.046, 0.065–0.187) | 0.533 / 0.147 | 0.493 / 0.073 |
+| P2 global window RMS | 0.806 (0.046, 0.744–0.880) | 0.147 (0.058, 0.054–0.260) | 0.803 / 0.173 | 0.785 / 0.102 |
+
+**Paired per-subject change vs baseline (macro-F1):**
+
+| Configuration | Within-subject | New-subject |
+|---|---|---|
+| P1 | −0.274 (SD 0.052), 0/10 improved | −0.024 (SD 0.031), 2/10 improved |
+| P2 | +0.004 (SD 0.013), 5/10 improved | −0.012 (SD 0.032), 4/10 improved |
+
+**Interpretation:** P1 is falsified. Forcing every channel to unit RMS in every
+window removes the relative and absolute channel-activation levels that
+distinguish gestures, which costs 0.27 within-subject macro-F1 and does not help
+new subjects. P2 preserves relative channel activation and shows no measurable
+difference in either mode: changes are far smaller than the across-subject SD.
+Neither per-window method reduced the within/new-subject gap, which suggests
+that per-window scaling removes gesture information together with subject
+differences.
+
+**Decision:** Reject P1. Do not adopt P2 (no measurable benefit), so identity
+preprocessing remains the reference. Next: per-subject calibration (P3), which
+targets the between-subject amplitude scale found in the diagnostics while
+preserving within-subject amplitude differences between gestures.
