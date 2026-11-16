@@ -182,6 +182,15 @@ RMS. Planned: P3 per-subject calibration (5 in total). Feature and classifier
 comparisons are counted separately by their owners and summed in the final
 report.
 
+**Noise floor (2026-11-16):** the unchanged baseline was run with seeds 0–4 on
+the same S1–S10 folds (`experiment_seed_noise.py`, log `seed_noise_run.txt`).
+Subject-mean macro-F1 varied by at most 0.001 within-subject (0.8016, SD 0.0005)
+and 0.003 new-subject (0.1586, SD 0.0013). Seed variation is therefore
+negligible; the limiting uncertainty is between subjects. Every comparison is
+therefore judged by its paired per-subject change and that change's standard
+error (paired SD / √10), plus the count of subjects that improved, not by the
+seed spread. A change within about 2 SE is reported as no measurable difference.
+
 ## Revisions — the ones that went **backwards** (Criterion 9's actual evidence)
 
 Adding iterations forward is a to-do list. What this section wants is the place a number
