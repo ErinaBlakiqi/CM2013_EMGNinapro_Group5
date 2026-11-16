@@ -360,3 +360,33 @@ that subject's feature values, so P3 can only affect new-subject results.
 2 SE across subjects (paired SD / √10).
 
 **Budget:** 5th and final preprocessing configuration.
+
+### Iteration 5 — P3 results (2026-11-16)
+
+**Run:** `experiment_p3_calibration.py`, log `p3_eval_run.txt`. 8/8 correctness
+tests passed. S1–S10, 24,657 scored windows (repetitions 2–10); 2,918
+calibration windows (repetition 1) used only to compute the scales.
+
+| Configuration | Within-subject mean macro-F1 (SD, range) | New-subject mean macro-F1 (SD, range) | Pooled new-subject macro-F1 / κ |
+|---|---|---|---|
+| Baseline (identity), reps 2–10 | 0.812 (0.041, 0.759–0.875) | 0.158 (0.063, 0.073–0.262) | 0.185 / 0.118 |
+| P3 subject calibration, reps 2–10 | 0.812 (0.041, 0.759–0.875) | 0.195 (0.067, 0.073–0.260) | 0.201 / 0.138 |
+
+**Paired change P3 − baseline (new-subject):** mean +0.037, SD 0.044,
+SE 0.014 (2.6 SE); 8/10 subjects improved, 2 worse (S4 −0.029, S8 −0.012).
+Within-subject unchanged (+0.0001), as predicted in the plan.
+
+**Calibration scales:** channel RMS over the calibration repetition varied
+strongly between subjects (e.g. CH1 0.0029–0.96, CH7 0.060–2.01), confirming
+the amplitude diagnostics.
+
+**Decision:** adopt P3. It meets the pre-registered rule and is the only
+preprocessing configuration with a measurable new-subject gain.
+
+**Limitations:** the within/new-subject gap remains large (0.812 vs 0.195), so
+amplitude scale explains only part of it. The worst subject (S7, +0.001) was
+not helped, which points to factors other than amplitude scale (e.g. electrode
+placement / activation pattern differences). Deployment requires a calibration
+session. Result is from the development set; to be confirmed once on S11–S22.
+For the hold-out predictions, each subject's scale is computed from its own
+repetition 1, and those windows are also predicted.
